@@ -1,6 +1,9 @@
 import '../reset.css';
 import '../App.css';
 import {useState} from "react";
+import TodoForm from "./TodoForm";
+import TodoList from "./TodoList";
+import NoTodos from "./NoTodos";
 
 function App() {
     const [todos, setTodos] = useState([
@@ -24,31 +27,22 @@ function App() {
         }
     ]);
 
-    const [todoInput, setTodoInput] = useState('');
     const [idForTodo, setIdForTodo] = useState(4);
 
-    function addTodo(event) {
-        event.preventDefault();
+    function addTodo(todo) {
 
-        if (todoInput.trim().length === 0) {
-            return;
-        }
 
         setTodos([
             ...todos,
             {
                 id: idForTodo,
-                title: todoInput,
+                title: todo,
                 isCompleted: false,
             }
         ])
 
-        setTodoInput('');
-        setIdForTodo((prevIdForTodo) => prevIdForTodo + 1);
-    }
 
-    function handleInput(event) {
-        setTodoInput(event.target.value);
+        setIdForTodo((prevIdForTodo) => prevIdForTodo + 1);
     }
 
     function deleteTodo(id) {
@@ -82,7 +76,7 @@ function App() {
     function updateTodo(event, id) {
         const updatedTodos = todos.map((todo) => {
             if (todo.id === id) {
-                if(event.target.value.trim().length === 0) {
+                if (event.target.value.trim().length === 0) {
                     todo.isEditing = false;
                     return todo;
                 }
@@ -96,7 +90,7 @@ function App() {
         setTodos(updatedTodos);
     }
 
-    function cancelEdit(event,id) {
+    function cancelEdit(event, id) {
         const updatedTodos = todos.map((todo) => {
             if (todo.id === id) {
                 todo.isEditing = false;
@@ -112,81 +106,20 @@ function App() {
         <div className="todo-app-container">
             <div className="todo-app">
                 <h2>Todo App</h2>
-                <form action="#" onSubmit={addTodo}>
-                    <input
-                        type="text"
-                        value={todoInput}
-                        onChange={handleInput}
-                        className="todo-input"
-                        placeholder="What do you need to do?"
+                <TodoForm addTodo={addTodo}/>
+
+                {todos.length > 0 ? (
+                    <TodoList
+                        todos={todos}
+                        completeTodo={completeTodo}
+                        markAsEditing={markAsEditing}
+                        updateTodo={updateTodo}
+                        cancelEdit={cancelEdit}
+                        deleteTodo={deleteTodo}
                     />
-                </form>
-
-                <ul className="todo-list">
-                    {todos.map((todo, index) => (
-                        <li key={todo.id} className="todo-item-container">
-                            <div className="todo-item">
-                                <input type="checkbox" onChange={() => completeTodo(todo.id)}
-                                       checked={!!todo.isCompleted}/>
-
-                                {!todo.isEditing ? (
-                                    <span
-                                        onDoubleClick={() => markAsEditing(todo.id)}
-                                        className={`todo-item-label ${todo.isCompleted ? 'line-through' : ''}`}>{todo.title}</span>
-                                ) : (
-                                    <input type="text"
-                                           onBlur={(event) => updateTodo(event, todo.id)}
-                                           onKeyDown={(event) => {
-                                               if(event.key === 'Enter'){
-                                                    updateTodo(event, todo.id);
-                                               }else if(event.key === 'Escape') {
-                                                   cancelEdit(event,todo.id);
-                                               }
-                                           }}
-                                           className="todo-item-input"
-                                           defaultValue={todo.title}
-                                           autoFocus/>
-                                )}
-                            </div>
-                            <button onClick={() => deleteTodo(todo.id)} className="x-button">
-                                <svg
-                                    className="x-button-icon"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-
-                <div className="check-all-container">
-                    <div>
-                        <div className="button">Check All</div>
-                    </div>
-
-                    <span>3 items remaining</span>
-                </div>
-
-                <div className="other-buttons-container">
-                    <div>
-                        <button className="button filter-button filter-button-active">
-                            All
-                        </button>
-                        <button className="button filter-button">Active</button>
-                        <button className="button filter-button">Completed</button>
-                    </div>
-                    <div>
-                        <button className="button">Clear completed</button>
-                    </div>
-                </div>
+                ) : (
+                    <NoTodos/>
+                )}
             </div>
         </div>
     );
