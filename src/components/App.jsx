@@ -8,16 +8,19 @@ function App() {
             id: 1,
             title: 'Finish React Series',
             isCompleted: false,
+            isEditing: false,
         },
         {
             id: 2,
             title: 'Go to Grocery',
             isCompleted: true,
+            isEditing: false,
         },
         {
             id: 3,
             title: 'Take over world',
             isCompleted: false,
+            isEditing: false,
         }
     ]);
 
@@ -27,7 +30,7 @@ function App() {
     function addTodo(event) {
         event.preventDefault();
 
-        if(todoInput.trim().length === 0) {
+        if (todoInput.trim().length === 0) {
             return;
         }
 
@@ -52,6 +55,59 @@ function App() {
         setTodos([...todos].filter((todo) => todo.id !== id));
     }
 
+    function completeTodo(id) {
+        const updatedTodos = todos.map((todo) => {
+            if (todo.id === id) {
+                todo.isCompleted = !todo.isCompleted;
+            }
+
+            return todo;
+        })
+
+        setTodos(updatedTodos);
+    }
+
+    function markAsEditing(id) {
+        const updatedTodos = todos.map((todo) => {
+            if (todo.id === id) {
+                todo.isEditing = true;
+            }
+
+            return todo;
+        })
+
+        setTodos(updatedTodos);
+    }
+
+    function updateTodo(event, id) {
+        const updatedTodos = todos.map((todo) => {
+            if (todo.id === id) {
+                if(event.target.value.trim().length === 0) {
+                    todo.isEditing = false;
+                    return todo;
+                }
+                todo.title = event.target.value;
+                todo.isEditing = false;
+            }
+
+            return todo;
+        })
+
+        setTodos(updatedTodos);
+    }
+
+    function cancelEdit(event,id) {
+        const updatedTodos = todos.map((todo) => {
+            if (todo.id === id) {
+                todo.isEditing = false;
+            }
+
+            return todo;
+        })
+
+        setTodos(updatedTodos);
+    }
+
     return (
         <div className="todo-app-container">
             <div className="todo-app">
@@ -70,11 +126,29 @@ function App() {
                     {todos.map((todo, index) => (
                         <li key={todo.id} className="todo-item-container">
                             <div className="todo-item">
-                                <input type="checkbox"/>
-                                <span className="todo-item-label">{todo.title}</span>
-                                {/* <input type="text" className="todo-item-input" value="Finish React Series" /> */}
+                                <input type="checkbox" onChange={() => completeTodo(todo.id)}
+                                       checked={!!todo.isCompleted}/>
+
+                                {!todo.isEditing ? (
+                                    <span
+                                        onDoubleClick={() => markAsEditing(todo.id)}
+                                        className={`todo-item-label ${todo.isCompleted ? 'line-through' : ''}`}>{todo.title}</span>
+                                ) : (
+                                    <input type="text"
+                                           onBlur={(event) => updateTodo(event, todo.id)}
+                                           onKeyDown={(event) => {
+                                               if(event.key === 'Enter'){
+                                                    updateTodo(event, todo.id);
+                                               }else if(event.key === 'Escape') {
+                                                   cancelEdit(event,todo.id);
+                                               }
+                                           }}
+                                           className="todo-item-input"
+                                           defaultValue={todo.title}
+                                           autoFocus/>
+                                )}
                             </div>
-                            <button onClick={ () => deleteTodo(todo.id)} className="x-button">
+                            <button onClick={() => deleteTodo(todo.id)} className="x-button">
                                 <svg
                                     className="x-button-icon"
                                     fill="none"
