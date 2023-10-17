@@ -5,6 +5,7 @@ import TodoCompleteAll from "./TodoCompleteAll";
 import TodoFilters from "./TodoFilters";
 import useToggle from "../hooks/useToggle";
 import {TodosContext} from "../context/TodosContext";
+import {CSSTransition, TransitionGroup} from "react-transition-group";
 function TodoList() {
     const { todosFiltered, todos, setTodos } = useContext(TodosContext);
     const [isFeaturesOneVisible, setFeaturesOneVisible] = useToggle();
@@ -70,8 +71,9 @@ function TodoList() {
 
     return (
         <>
-            <ul className="todo-list">
+            <TransitionGroup component="ul" className="todo-list">
                 {todosFiltered().map((todo, index) => (
+                    <CSSTransition key={todo.id} timeout={300} classNames="slide-horizontal">
                     <li key={todo.id} className="todo-item-container">
                         <div className="todo-item">
                             <input type="checkbox" onChange={() => completeTodo(todo.id)}
@@ -112,8 +114,9 @@ function TodoList() {
                             </svg>
                         </button>
                     </li>
+                    </CSSTransition>
                 ))}
-            </ul>
+            </TransitionGroup>
 
             <div className="toggles-container">
                 <button onClick={setFeaturesOneVisible}
@@ -126,22 +129,33 @@ function TodoList() {
                 </button>
             </div>
 
-            {isFeaturesOneVisible && (
+            <CSSTransition
+                in={isFeaturesOneVisible}
+                timeout={300}
+                classNames="slide-vertical"
+                unmountOnExit
+            >
                 <div className="check-all-container">
                     <TodoCompleteAll />
 
                     <TodoItemsRemaining/>
                 </div>
-            )}
+            </CSSTransition>
 
-            {isFeaturesTwoVisible && (
+
+            <CSSTransition
+                in={isFeaturesTwoVisible}
+                timeout={300}
+                classNames="slide-vertical"
+                unmountOnExit
+            >
                 <div className="other-buttons-container">
                     <TodoFilters/>
                     <div>
                         <TodoClearCompleted/>
                     </div>
                 </div>
-            )}
+            </CSSTransition>
         </>
     );
 }
